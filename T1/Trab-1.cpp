@@ -63,18 +63,25 @@ void dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     }
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
-    
-    cout << "**Depth-First Search**" << endl;
+    int cnt = 0;
+    cout << endl;
+    cout << "**Depth-First Search**" << endl << endl;
     cout << "Caminho encontrado:" << endl;
     for(auto a : final_path){
-        cout << "(" << a.first << "," << a.second << ")" << ' ';
+        if(cnt%4 == 0) cout << endl;
+        cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
+        cnt++;
     }
-    cout << endl;
-    cout << "Tempo de Execucao: " << time;
     cout << endl << endl;
+
+    cout << "Representacao no tabuleiro:" << endl << endl; 
 
     Print_Matrix(matrix_answer, row, column);
     cout << endl;
+
+    cout << "Tempo de execucao: " << time;
+    cout << endl << endl;
+
    
     Print_Lines();
 
@@ -140,19 +147,24 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     Print_Lines();
     cout << endl;
 
-    cout << "**Breadth-First Search**" << endl;
+    int cnt = 0;
+    cout << "**Breadth-First Search**" << endl << endl;
     cout << "Caminho encontrado:" << endl;
     for(auto a : SetPoints){
-        cout << "(" << a.first << "," << a.second << ")" << ' ';
+        if(cnt%4 == 0) cout << endl;
+        cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
+        cnt++;
     }
-    cout << endl;
-    cout << fixed << setprecision(6);
-    cout << "Tempo de Execucao: " << time;
     cout << endl << endl;
+    
+    cout << "Representacao no tabuleiro:" << endl << endl;
 
     Print_Matrix(matrix_answer, row, column);
     cout << endl;
    
+    cout << "Tempo de execucao: " << time;
+    cout << endl << endl;
+
     Print_Lines();
 
     Free_Matrix(matrix_answer, row);
@@ -248,6 +260,7 @@ void Print_Lines(){
 }
 
 int main(){
+    cout << fixed << setprecision(6);
 
     int row, column;
 
@@ -257,12 +270,15 @@ int main(){
 
     Read_Matrix(matrix, row, column);
 
-    cout << "Tabuleiro recebido como parametro:" << endl << endl;
-    Print_Matrix(matrix, row, column);
-    cout << endl << endl;
-    
     pii blue_block = Get_Blue(matrix, row, column);
     pii red_block = Get_Red(matrix, row, column);
+
+    cout << "Tabuleiro recebido como parametro:" << endl << endl;
+    cout << "Ponto inicial: " << "(" << blue_block.first << "," << blue_block.second << ")" << endl;
+    cout << "Ponto final: " << "(" << red_block.first << "," << red_block.second << ")" << endl;
+    cout << endl;
+    Print_Matrix(matrix, row, column);
+    cout << endl << endl;
     
     bfs(matrix, row, column, blue_block, red_block);
     
