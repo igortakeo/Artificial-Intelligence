@@ -12,6 +12,7 @@ pii Get_Blue(char **matrix, int row, int column);
 pii Get_Red(char **matrix, int row, int column);
 void Free_Matrix(char **matrix, int row);
 void Print_Matrix(char **matrix, int row, int column);
+void Print_Lines();
 
 
 vector<pii>mov {{0,1},{0,-1},{1,0},{-1,0}};
@@ -71,9 +72,12 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     end = clock();
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
-
-    cout << "Breadth-First-Search:" << endl;
-    cout << "Caminho encontrado: ";
+    
+    Print_Lines();
+    cout << endl;
+    
+    cout << "**Breadth-First-Search**" << endl;
+    cout << "Caminho encontrado:\n";
     for(auto a : SetPoints){
         cout << "(" << a.first << "," << a.second << ")" << ' ';
     }
@@ -82,6 +86,9 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     cout << endl << endl;
 
     Print_Matrix(matrix_answer, row, column);
+    cout << endl;
+   
+    Print_Lines();
 
     Free_Matrix(matrix_answer, row);
 }
@@ -168,7 +175,11 @@ void Print_Matrix(char **matrix, int row, int column){
         }
         cout << endl;
     }
+}
 
+void Print_Lines(){
+    cout << "======================================================================================================================================================" << endl;
+    cout << "======================================================================================================================================================" << endl;
 }
 
 int main(){

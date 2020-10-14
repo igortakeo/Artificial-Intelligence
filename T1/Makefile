@@ -4,4 +4,7 @@ run:
 	./Trab-1 < 1.in
 
 valgrind:	
-	valgrind ./Trab-1 < 1.in		 	
+	valgrind ./Trab-1 < 1.in
+
+clean:
+	rm -r -f Trab-1		 	
