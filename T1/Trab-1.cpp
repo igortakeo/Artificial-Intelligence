@@ -70,7 +70,7 @@ void dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
         cout << "(" << a.first << "," << a.second << ")" << ' ';
     }
     cout << endl;
-    cout << "Tempo de Execucao: " << fixed << time << setprecision(9);
+    cout << "Tempo de Execucao: " << time;
     cout << endl << endl;
 
     Print_Matrix(matrix_answer, row, column);
@@ -116,7 +116,7 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
         }
         
     }
-    
+
     end = clock();
 
     char **matrix_answer = Alloc_Matrix(row, column);
