@@ -4,6 +4,7 @@ using namespace std;
 
 //Declaracoes das funcoes que serao usadas no codigo
 
+void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block);
 int **Build_Heuristic(char **matrix, int row, int column, pii blue_block, pii red_block);
 void A_star(char **matrix, int row, int column, pii blue_block, pii red_block);
 void solve_dfs(char **matrix, int row, int column, pii block, pii red_block, vector<pii>&path, map<pii, bool>&vis, vector<pii>&final_path);
@@ -18,7 +19,95 @@ void Free_Matrix(char **matrix, int row);
 void Print_Matrix(char **matrix, int row, int column);
 void Print_Lines();
 
-vector<pii>mov {{0,1}, {1,0}, {0,-1},{-1,0}};
+vector<pii>mov {{0,-1}, {-1,0}, {0,1}, {1,0}};
+
+
+void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block){
+    clock_t start, end;
+
+    start = clock();
+
+    int **matrix_dist = Build_Heuristic(matrix, row, column, blue_block, red_block);
+
+    map<pii, pii>path;
+    map<pii, bool>vis;
+    priority_queue<pair<int, pii>>pq;
+
+    vis[blue_block] = true;
+    pq.push({-matrix_dist[blue_block.first][blue_block.second], blue_block});
+
+    while(!pq.empty()){
+
+        pii block = pq.top().second;
+
+        if(block == red_block) break;
+
+        pq.pop();
+
+        for(auto a : mov){  
+            pii next = make_pair(block.first+a.first, block.second+a.second);
+            if(next.first == 0 or next.second == 0 or next.first == row+1 or next.second == column+1){ 
+                continue;
+            }
+            if((matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$') and !vis[next]){  
+                pq.push({-matrix_dist[next.first][next.second],next});
+                vis[next] = true;
+                path[next] = block;
+            }
+        }
+        
+    }
+
+    end = clock();
+
+    char **matrix_answer = Alloc_Matrix(row, column);
+
+    Copy_Matrix(matrix_answer, matrix, row, column);
+
+    pii pred = red_block;
+    vector<pii>SetPoints;
+    SetPoints.push_back(pred);
+    
+    while(true){
+        pred = path[pred];
+        SetPoints.push_back(pred);    
+        if(pred == blue_block) break;
+        matrix_answer[pred.first][pred.second] = 'C';
+    }   
+    reverse(SetPoints.begin(), SetPoints.end());
+
+    double time = double(end - start) / double(CLOCKS_PER_SEC);
+    
+    cout << endl;
+
+    int cnt = 0;
+    cout << "** Best First Search **" << endl << endl;
+    cout << "Caminho encontrado:" << endl;
+    for(auto a : SetPoints){
+        if(cnt%4 == 0) cout << endl;
+        cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
+        cnt++;
+    }
+    cout << endl << endl;
+    
+    cout << "Representacao no tabuleiro:" << endl << endl;
+
+    Print_Matrix(matrix_answer, row, column);
+    cout << endl;
+   
+    cout << "Tempo de execucao: " << time;
+    cout << endl << endl;
+
+    Print_Lines();
+
+    Free_Matrix(matrix_answer, row);
+
+    for(int i=1; i<=row; i++){
+        free(matrix_dist[i]);
+    }
+    free(matrix_dist);
+
+}
 
 
 int **Build_Heuristic(char **matrix, int row, int column, pii blue_block, pii red_block){
@@ -27,6 +116,12 @@ int **Build_Heuristic(char **matrix, int row, int column, pii blue_block, pii re
 
     for(int i=1; i<=row; i++){
         matrix_dist[i] = (int*) malloc((column+1) * sizeof(int));
+    }
+
+    for(int i=1; i<=row; i++){
+       for(int j=1; j<=column; j++){
+            matrix_dist[i][j] = -1;
+        }
     }
 
     map<pii, bool>vis;
@@ -48,7 +143,7 @@ int **Build_Heuristic(char **matrix, int row, int column, pii blue_block, pii re
             if(next.first == 0 or next.second == 0 or next.first == row+1 or next.second == column+1){ 
                 continue;
             }
-            if(!vis[next]){  
+            if((matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$' or matrix[next.first][next.second] == '#') and !vis[next]){  
                 q.push(next);
                 vis[next] = true;
                 matrix_dist[next.first][next.second] = matrix_dist[block.first][block.second]+1;
@@ -67,18 +162,27 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block){
     start = clock();
 
     int **matrix_dist = Build_Heuristic(matrix, row, column, blue_block, red_block);
-
+    /*
+    for(int i=1; i<=row; i++){
+       for(int j=1; j<=column; j++){
+            cout << matrix_dist[i][j] << ' ';
+        }
+        cout << endl;
+    }
+    cout << endl << endl;
+    */
     map<pii, pii>path;
     map<pii, bool>vis;
-    priority_queue<pair<int, pii>>pq;
+    priority_queue<pair<pii, pii>>pq;
 
     vis[blue_block] = true;
-    pq.push({-matrix_dist[blue_block.first][blue_block.second], blue_block});
+    pq.push({{-matrix_dist[blue_block.first][blue_block.second],0}, blue_block});
 
     while(!pq.empty()){
 
         pii block = pq.top().second;
-        
+        int depth = pq.top().first.second;
+
         if(block == red_block) break;
 
         pq.pop();
@@ -89,7 +193,7 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block){
                 continue;
             }
             if((matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$') and !vis[next]){  
-                pq.push({-matrix_dist[next.first][next.second],next});
+                pq.push({{-(matrix_dist[next.first][next.second]+depth+1),depth+1},next});
                 vis[next] = true;
                 path[next] = block;
             }
@@ -415,6 +519,8 @@ int main(){
     dfs(matrix, row, column, blue_block, red_block);
 
     A_star(matrix, row, column, blue_block, red_block);
+
+    bestfs(matrix, row, column, blue_block, red_block);
 
     Free_Matrix(matrix, row);
 
