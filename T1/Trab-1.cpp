@@ -1,12 +1,15 @@
 #include <bits/stdc++.h>
 #define pii pair<int, int>
+#define pdi pair<double, int>
 using namespace std;
 
 //Declaracoes das funcoes que serao usadas no codigo
 
-void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block);
-int **Build_Heuristic(char **matrix, int row, int column, pii blue_block, pii red_block);
-void A_star(char **matrix, int row, int column, pii blue_block, pii red_block);
+double **Euclidian_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
+double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
+void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
+void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
+void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
 void solve_dfs(char **matrix, int row, int column, pii block, pii red_block, vector<pii>&path, map<pii, bool>&vis, vector<pii>&final_path);
 void dfs(char **matrix, int row, int column, pii blue_block, pii red_block);
 void bfs(char **matrix, int row, int column, pii blue_block, pii red_block);
@@ -17,21 +20,171 @@ pii Get_Blue(char **matrix, int row, int column);
 pii Get_Red(char **matrix, int row, int column);
 void Free_Matrix(char **matrix, int row);
 void Print_Matrix(char **matrix, int row, int column);
+void Print_Lines_One();
 void Print_Lines();
 
 vector<pii>mov {{0,-1}, {-1,0}, {0,1}, {1,0}};
 
 
-void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block){
+double **Euclidian_Distance(char **matrix, int row, int column, pii blue_block, pii red_block){
+    
+    double **matrix_dist = (double**) malloc((row+1) * sizeof(double*));
+
+    for(int i=1; i<=row; i++){
+        matrix_dist[i] = (double*) malloc((column+1) * sizeof(double));
+    }
+
+    for(int i=1; i<=row; i++){
+        for(int j=1; j<=column; j++){
+            matrix_dist[i][j] = sqrt((double)(red_block.first-i)*(double)(red_block.first-i)+(double)(red_block.second-j)*(double)(red_block.second-j));
+        }
+    }
+
+    return matrix_dist;
+
+}
+
+double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, pii red_block){
+
+    double **matrix_dist = (double**) malloc((row+1) * sizeof(double*));
+
+    for(int i=1; i<=row; i++){
+        matrix_dist[i] = (double*) malloc((column+1) * sizeof(double));
+    }
+
+    for(int i=1; i<=row; i++){
+       for(int j=1; j<=column; j++){
+            matrix_dist[i][j] = abs(red_block.first-i) + abs(red_block.second-j);
+        }
+    }
+    return matrix_dist;
+}
+
+void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
     clock_t start, end;
 
     start = clock();
 
-    int **matrix_dist = Build_Heuristic(matrix, row, column, blue_block, red_block);
+    double **matrix_dist;
+    if(h == 0) matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 1) matrix_dist = Euclidian_Distance(matrix, row, column, blue_block, red_block);
 
     map<pii, pii>path;
     map<pii, bool>vis;
-    priority_queue<pair<int, pii>>pq;
+
+    pii last;
+    queue<pii>q;
+    q.push(blue_block);
+    vis[blue_block] = true;
+
+    while(!q.empty()){
+
+        pii block = q.front();
+
+        if(block == red_block) break;
+
+        q.pop();
+
+        pii n;
+        double weight = -1;
+
+        for(auto a : mov){  
+            pii next = make_pair(block.first+a.first, block.second+a.second);
+            if(next.first == 0 or next.second == 0 or next.first == row+1 or next.second == column+1){ 
+                continue;
+            }
+
+            if(weight == -1 and (matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$') and !vis[next]){
+                n = next;
+                weight = matrix_dist[next.first][next.second];
+                continue;
+            }
+
+            if((matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$') and !vis[next] and weight > matrix_dist[next.first][next.second]){  
+                weight = matrix_dist[next.first][next.second];
+                n = next;   
+            }
+        }
+
+        if(weight == -1) continue;
+
+        q.push(n);
+        path[n] = block;
+        vis[n] = true;
+
+        last = n;
+    }
+
+    end = clock();
+
+    char **matrix_answer = Alloc_Matrix(row, column);
+
+    Copy_Matrix(matrix_answer, matrix, row, column);
+
+    pii pred = last;
+    vector<pii>SetPoints;
+    SetPoints.push_back(pred);
+    
+    if(matrix_answer[pred.first][pred.second] != '$')
+         matrix_answer[pred.first][pred.second] = 'C';
+   
+    while(true){
+        pred = path[pred];
+        SetPoints.push_back(pred);    
+        if(pred == blue_block) break;
+        matrix_answer[pred.first][pred.second] = 'C';
+    }   
+
+    reverse(SetPoints.begin(), SetPoints.end());
+
+    double time = double(end - start) / double(CLOCKS_PER_SEC);
+    
+    if(last != red_block) 
+        cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
+
+    int cnt = 0;
+     if(h == 0) 
+        cout << "Heuristica --> Distancia Manhattan" << endl << endl;
+    else if(h == 1)
+        cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
+    cout << "Caminho encontrado:" << endl;
+    for(auto a : SetPoints){
+        if(cnt%4 == 0) cout << endl;
+        cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
+        cnt++;
+    }
+    cout << endl << endl;
+    
+    cout << "Representacao no tabuleiro:" << endl << endl;
+
+    Print_Matrix(matrix_answer, row, column);
+    cout << endl;
+   
+    cout << "Tempo de execucao: " << time;
+    cout << endl << endl;
+
+    Free_Matrix(matrix_answer, row);
+
+    for(int i=1; i<=row; i++){
+        free(matrix_dist[i]);
+    }
+    free(matrix_dist);
+
+}
+
+
+void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
+    clock_t start, end;
+
+    start = clock();
+
+    double **matrix_dist;
+    if(h == 0) matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 1) matrix_dist = Euclidian_Distance(matrix, row, column, blue_block, red_block);
+
+    map<pii, pii>path;
+    map<pii, bool>vis;
+    priority_queue<pair<double, pii>>pq;
 
     vis[blue_block] = true;
     pq.push({-matrix_dist[blue_block.first][blue_block.second], blue_block});
@@ -81,7 +234,10 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     cout << endl;
 
     int cnt = 0;
-    cout << "** Best First Search **" << endl << endl;
+    if(h == 0) 
+        cout << "Heuristica --> Distancia Manhattan" << endl << endl;
+    else if(h == 1)
+        cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
     cout << "Caminho encontrado:" << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
@@ -98,8 +254,6 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     cout << "Tempo de execucao: " << time;
     cout << endl << endl;
 
-    Print_Lines();
-
     Free_Matrix(matrix_answer, row);
 
     for(int i=1; i<=row; i++){
@@ -109,71 +263,20 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block){
 
 }
 
-
-int **Build_Heuristic(char **matrix, int row, int column, pii blue_block, pii red_block){
-
-    int **matrix_dist = (int**) malloc((row+1) * sizeof(int*));
-
-    for(int i=1; i<=row; i++){
-        matrix_dist[i] = (int*) malloc((column+1) * sizeof(int));
-    }
-
-    for(int i=1; i<=row; i++){
-       for(int j=1; j<=column; j++){
-            matrix_dist[i][j] = -1;
-        }
-    }
-
-    map<pii, bool>vis;
-    queue<pii>q;
-
-    vis[red_block] = true;
-    q.push(red_block);
-
-    matrix_dist[red_block.first][red_block.second] = 0;
-
-    while(!q.empty()){
-
-        pii block = q.front();
-        
-        q.pop();
-
-        for(auto a : mov){  
-            pii next = make_pair(block.first+a.first, block.second+a.second);
-            if(next.first == 0 or next.second == 0 or next.first == row+1 or next.second == column+1){ 
-                continue;
-            }
-            if((matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$' or matrix[next.first][next.second] == '#') and !vis[next]){  
-                q.push(next);
-                vis[next] = true;
-                matrix_dist[next.first][next.second] = matrix_dist[block.first][block.second]+1;
-            }
-        }
-        
-    }
-
-    return matrix_dist;
-}
-
-
-void A_star(char **matrix, int row, int column, pii blue_block, pii red_block){
+void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
     clock_t start, end;
 
     start = clock();
 
-    int **matrix_dist = Build_Heuristic(matrix, row, column, blue_block, red_block);
-    /*
-    for(int i=1; i<=row; i++){
-       for(int j=1; j<=column; j++){
-            cout << matrix_dist[i][j] << ' ';
-        }
-        cout << endl;
-    }
-    cout << endl << endl;
-    */
+    double **matrix_dist;
+    if(h == 0) 
+        matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 1)
+        matrix_dist = Euclidian_Distance(matrix, row, column, blue_block, red_block);
+
     map<pii, pii>path;
     map<pii, bool>vis;
-    priority_queue<pair<pii, pii>>pq;
+    priority_queue<pair<pdi, pii>>pq;
 
     vis[blue_block] = true;
     pq.push({{-matrix_dist[blue_block.first][blue_block.second],0}, blue_block});
@@ -220,12 +323,13 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block){
     reverse(SetPoints.begin(), SetPoints.end());
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
-    
-    cout << endl;
 
     int cnt = 0;
-    cout << "** A* Search **" << endl << endl;
-    cout << "Caminho encontrado:" << endl;
+    if(h == 0) 
+        cout << "Heuristica --> Distancia Manhattan" << endl << endl;
+    else if(h == 1)
+        cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
+    cout << "Caminho encontrado: " << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
         cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
@@ -240,8 +344,6 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block){
    
     cout << "Tempo de execucao: " << time;
     cout << endl << endl;
-
-    Print_Lines();
 
     Free_Matrix(matrix_answer, row);
 
@@ -316,7 +418,6 @@ void dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     cout << "Tempo de execucao: " << time;
     cout << endl << endl;
 
-   
     Print_Lines();
 
     Free_Matrix(matrix_answer, row);
@@ -488,6 +589,10 @@ void Print_Matrix(char **matrix, int row, int column){
     }
 }
 
+void Print_Lines_One(){
+    cout << "------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
+}
+
 void Print_Lines(){
     cout << "======================================================================================================================================================" << endl;
     cout << "======================================================================================================================================================" << endl;
@@ -518,10 +623,27 @@ int main(){
     
     dfs(matrix, row, column, blue_block, red_block);
 
-    A_star(matrix, row, column, blue_block, red_block);
+    cout <<"**(A* Search)**" << endl;
+    for(int i=0; i<2; i++){
+        Print_Lines_One();
+        A_star(matrix, row, column, blue_block, red_block, i);
+    }
+    Print_Lines();
 
-    bestfs(matrix, row, column, blue_block, red_block);
-
+    cout << "**(Best First Search)**" << endl;
+    for(int i=0; i<2; i++){
+        Print_Lines_One();
+        bestfs(matrix, row, column, blue_block, red_block, i);
+    }
+    Print_Lines();
+    
+    cout << "**(Hill Climbing)**" << endl;
+    for(int i=0; i<2; i++){
+        Print_Lines_One();
+        hill_climbing(matrix, row, column, blue_block, red_block, i);
+    }
+    Print_Lines();
+    
     Free_Matrix(matrix, row);
 
     return 0;
