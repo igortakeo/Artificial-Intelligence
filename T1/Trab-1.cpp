@@ -6,6 +6,7 @@ using namespace std;
 
 //Declaracoes das funcoes que serao usadas no codigo
 
+double **Manhattan_Plus_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block);
 double **Minkowski_Distance(char **matrix, int row, int column, pii blue_block, pii red_block, int p);
 double **Euclidean_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
 double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
@@ -27,6 +28,22 @@ void Print_Lines();
 
 vector<pii>mov {{0,-1}, {-1,0}, {0,1}, {1,0}};
 
+double **Manhattan_Plus_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block){
+
+    double **matrix_dist = (double**) malloc((row+1) * sizeof(double*));
+
+    for(int i=1; i<=row; i++){
+        matrix_dist[i] = (double*) malloc((column+1) * sizeof(double));
+    }
+
+    for(int i=1; i<=row; i++){
+       for(int j=1; j<=column; j++){
+            matrix_dist[i][j] = abs(red_block.first-i) + abs(red_block.second-j);
+            matrix_dist[i][j] += sqrt((double)(red_block.first-i)*(double)(red_block.first-i)+(double)(red_block.second-j)*(double)(red_block.second-j));
+        }
+    }
+    return matrix_dist;
+}
 
 double **Minkowski_Distance(char **matrix, int row, int column, pii blue_block, pii red_block, int p){
 
@@ -97,6 +114,21 @@ pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_bl
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 3);
     else if(h == 3)
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 4); 
+    else if(h == 4)
+        matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
+
+    /*
+    cout << setprecision(3);
+    if(h == 0 or h == 1){
+    for(int i=1; i<=row; i++){
+        for(int j=1; j<=column; j++){
+                cout << matrix_dist[i][j] << ' ';
+            }
+            cout << endl;
+        }
+    }
+    cout << endl;
+    */
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -186,6 +218,9 @@ pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_bl
         cout << "Heuristica --> Distancia Minkowski com p = 3" << endl;
     else if(h == 3)
         cout << "Heuristica --> Distancia Minkowski com p = 4" << endl;
+    else if(h == 4)
+        cout << "Heuristica --> Distancia Manhattan mais Euclidiana" << endl;
+    
     
     cout << "Caminho percorrido:" << endl;
     for(auto a : SetPoints){
@@ -231,6 +266,9 @@ pdi bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, in
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 3);
     else if(h == 3)
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 4); 
+    else if(h == 4)
+        matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
+
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -303,6 +341,9 @@ pdi bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, in
         cout << "Heuristica --> Distancia Minkowski com p = 3" << endl;
     else if(h == 3)
         cout << "Heuristica --> Distancia Minkowski com p = 4" << endl;
+    else if(h == 4)
+        cout << "Heuristica --> Distancia Manhattan mais Euclidiana" << endl;
+    
     
     cout << "Caminho percorrido:" << endl;
     for(auto a : SetPoints){
@@ -347,6 +388,8 @@ pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, in
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 3);
     else if(h == 3)
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 4); 
+    else if(h == 4)
+        matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -421,6 +464,8 @@ pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, in
         cout << "Heuristica --> Distancia Minkowski com p = 3" << endl;
     else if(h == 3)
         cout << "Heuristica --> Distancia Minkowski com p = 4" << endl;
+    else if(h == 4)
+        cout << "Heuristica --> Distancia Manhattan mais Euclidiana" << endl;
     
     cout << "Caminho percorrido: " << endl;
     for(auto a : SetPoints){
@@ -731,6 +776,7 @@ int main(){
     char **matrix = Alloc_Matrix(row, column);
 
     vector<pdi>final_report[3];
+    int j=0;
 
     Read_Matrix(matrix, row, column);
 
@@ -743,15 +789,13 @@ int main(){
     cout << endl;
     Print_Matrix(matrix, row, column);
     cout << endl << endl;
-
+    
     pdi final_report_bfs = bfs(matrix, row, column, blue_block, red_block);
     
     pdi final_report_dfs = dfs(matrix, row, column, blue_block, red_block);
 
-    int j = 0;
-    
     cout <<"**(A* Search)**" << endl;
-    for(int i=0; i<4; i++){
+    for(int i=0; i<5; i++){
         Print_Lines_One();
         pdi x = A_star(matrix, row, column, blue_block, red_block, i);
         final_report[j].push_back(x);
@@ -760,16 +804,16 @@ int main(){
     j++;
     
     cout << "**(Best First Search)**" << endl;
-    for(int i=0; i<4; i++){
+    for(int i=0; i<5; i++){
         Print_Lines_One();
         pdi x = bestfs(matrix, row, column, blue_block, red_block, i);
         final_report[j].push_back(x);
     }
     Print_Lines();
     j++;
-
+    
     cout << "**(Hill Climbing)**" << endl;
-    for(int i=0; i<4; i++){
+    for(int i=0; i<5; i++){
         Print_Lines_One();
         pdi x = hill_climbing(matrix, row, column, blue_block, red_block, i);
         final_report[j].push_back(x);
@@ -791,12 +835,13 @@ int main(){
         if(i == 0) s = "A* Search";
         else if(i == 1) s = "Best First Search";
         else if(i == 2) s = "Hill Climbing";
-        for(int j=0; j<4; j++){
+        for(int j=0; j<5; j++){
             string p;
             if(j == 0) p = " (Heuristica --> Distancia Manhattan): ";
             else if (j == 1) p = " (Heuristica --> Distancia Euclidiana): ";
             else if (j == 2) p = " (Heuristica --> Distancia de Minkowski p = 3): ";
             else if (j == 3) p = " (Heuristica --> Distancia de Minkowski p = 4): ";
+            else if (j == 4) p = " (Heuristica --> Distancia Manhattan mais Euclidiana): ";
 
             cout << s+p;
             string e = "";
@@ -808,7 +853,7 @@ int main(){
     }
 
     cout << endl;
-
+    
     Free_Matrix(matrix, row);
 
     return 0;
