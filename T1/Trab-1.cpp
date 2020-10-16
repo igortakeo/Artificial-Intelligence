@@ -5,14 +5,15 @@ using namespace std;
 
 //Declaracoes das funcoes que serao usadas no codigo
 
+double **Minkowski_Distance(char **matrix, int row, int column, pii blue_block, pii red_block, int p);
 double **Euclidean_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
 double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
-void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
-void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
-void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
+pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
+pdi bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
+pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
 void solve_dfs(char **matrix, int row, int column, pii block, pii red_block, vector<pii>&path, map<pii, bool>&vis, vector<pii>&final_path);
-void dfs(char **matrix, int row, int column, pii blue_block, pii red_block);
-void bfs(char **matrix, int row, int column, pii blue_block, pii red_block);
+pdi dfs(char **matrix, int row, int column, pii blue_block, pii red_block);
+pdi bfs(char **matrix, int row, int column, pii blue_block, pii red_block);
 void Copy_Matrix(char **a, char **b, int row, int column);
 void Read_Matrix(char **matrix, int row, int column);
 char **Alloc_Matrix(int row, int column);
@@ -25,6 +26,23 @@ void Print_Lines();
 
 vector<pii>mov {{0,-1}, {-1,0}, {0,1}, {1,0}};
 
+
+double **Minkowski_Distance(char **matrix, int row, int column, pii blue_block, pii red_block, int p){
+
+    double **matrix_dist = (double**) malloc((row+1) * sizeof(double*));
+
+    for(int i=1; i<=row; i++){
+        matrix_dist[i] = (double*) malloc((column+1) * sizeof(double));
+    }
+
+    for(int i=1; i<=row; i++){
+        for(int j=1; j<=column; j++){
+            matrix_dist[i][j] = pow((double)(red_block.first-i)*(double)(red_block.first-i)+(double)(red_block.second-j)*(double)(red_block.second-j), 1/(double)p);
+        }
+    }
+
+    return matrix_dist;
+}
 
 double **Euclidean_Distance(char **matrix, int row, int column, pii blue_block, pii red_block){
     
@@ -60,14 +78,24 @@ double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, 
     return matrix_dist;
 }
 
-void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
+pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
+    
+    pdi report;
+    report.second = 1;
+
     clock_t start, end;
 
     start = clock();
 
     double **matrix_dist;
-    if(h == 0) matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
-    else if(h == 1) matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
+    if(h == 0) 
+        matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 1) 
+        matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 2)
+        matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 58);
+    else if(h == 3)
+        matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 103); 
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -141,14 +169,23 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
     
-    if(last != red_block) 
+    if(last != red_block){ 
         cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
+        report.second = 0;
+    }
+
+    report.first = time;
 
     int cnt = 0;
      if(h == 0) 
         cout << "Heuristica --> Distancia Manhattan" << endl << endl;
     else if(h == 1)
         cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
+    else if(h == 2)
+        cout << "Heuristica --> Distancia Minkowski com p = 58" << endl;
+    else if(h == 3)
+        cout << "Heuristica --> Distancia Minkowski com p = 103" << endl;
+    
     cout << "Caminho percorrido:" << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
@@ -172,17 +209,27 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
     }
     free(matrix_dist);
 
+    return report;
 }
 
 
-void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
+pdi bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
+    pdi report;
+    report.second = 1;
+
     clock_t start, end;
 
     start = clock();
 
     double **matrix_dist;
-    if(h == 0) matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
-    else if(h == 1) matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
+    if(h == 0) 
+        matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 1) 
+        matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 2)
+        matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 58);
+    else if(h == 3)
+        matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 103); 
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -238,15 +285,24 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, i
     reverse(SetPoints.begin(), SetPoints.end());
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
-    
-    if(last != red_block) 
+
+    if(last != red_block){ 
         cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
+        report.second = 0;
+    }
+
+    report.first = time;
 
     int cnt = 0;
     if(h == 0) 
         cout << "Heuristica --> Distancia Manhattan" << endl << endl;
     else if(h == 1)
         cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
+    else if(h == 2)
+        cout << "Heuristica --> Distancia Minkowski com p = 58" << endl;
+    else if(h == 3)
+        cout << "Heuristica --> Distancia Minkowski com p = 103" << endl;
+    
     cout << "Caminho percorrido:" << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
@@ -270,9 +326,13 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, i
     }
     free(matrix_dist);
 
+    return report;
 }
 
-void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
+pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, int h){
+    pdi report;
+    report.second = 1;
+
     clock_t start, end;
 
     start = clock();
@@ -282,6 +342,10 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, i
         matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
     else if(h == 1)
         matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 2)
+        matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 58);
+    else if(h == 3)
+        matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 103); 
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -340,14 +404,23 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, i
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
 
-    if(last != red_block) 
+    if(last != red_block){ 
         cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
+        report.second = 0;
+    }
+
+    report.first = time;
 
     int cnt = 0;
     if(h == 0) 
         cout << "Heuristica --> Distancia Manhattan" << endl << endl;
     else if(h == 1)
         cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
+    else if(h == 2)
+        cout << "Heuristica --> Distancia Minkowski com p = 58" << endl;
+    else if(h == 3)
+        cout << "Heuristica --> Distancia Minkowski com p = 103" << endl;
+    
     cout << "Caminho percorrido: " << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
@@ -370,6 +443,8 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, i
         free(matrix_dist[i]);
     }
     free(matrix_dist);
+
+    return report;
 }
 
 
@@ -394,7 +469,10 @@ void solve_dfs(char **matrix, int row, int column, pii block, pii red_block, vec
     }
 }
 
-void dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
+pdi dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
+    
+    pdi report;
+    report.second = 1;
     
     vector<pii>path, final_path;
     map<pii, bool>vis;
@@ -419,8 +497,13 @@ void dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
     int cnt = 0;
-    if(final_path.size() == 0) 
+
+    if(final_path.size() == 0) {
         cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
+        report.second = 0;
+    }
+
+    report.first = time;
 
     cout << "** Depth-First Search **" << endl << endl;
     cout << "Caminho percorrido:" << endl;
@@ -442,9 +525,13 @@ void dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     Print_Lines();
 
     Free_Matrix(matrix_answer, row);
+
+    return report;
 }
 
-void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
+pdi bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
+    pdi report;
+    report.second = 1;
 
     clock_t start, end;
 
@@ -506,9 +593,13 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     double time = double(end - start) / double(CLOCKS_PER_SEC);
     
     Print_Lines();
-    
-    if(last != red_block) 
+
+    if(last != red_block){ 
         cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
+        report.second = 0;
+    }
+
+    report.first = time;
 
     int cnt = 0;
     cout << "** Breadth-First Search **" << endl << endl;
@@ -531,6 +622,8 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     Print_Lines();
 
     Free_Matrix(matrix_answer, row);
+
+    return report;
 }
 
 void Copy_Matrix(char **a, char **b, int row, int column){
@@ -635,6 +728,8 @@ int main(){
 
     char **matrix = Alloc_Matrix(row, column);
 
+    vector<pdi>final_report[3];
+
     Read_Matrix(matrix, row, column);
 
     pii blue_block = Get_Blue(matrix, row, column);
@@ -647,31 +742,71 @@ int main(){
     Print_Matrix(matrix, row, column);
     cout << endl << endl;
 
-    bfs(matrix, row, column, blue_block, red_block);
+    pdi final_report_bfs = bfs(matrix, row, column, blue_block, red_block);
     
-    dfs(matrix, row, column, blue_block, red_block);
+    pdi final_report_dfs = dfs(matrix, row, column, blue_block, red_block);
 
+    int j = 0;
+    
     cout <<"**(A* Search)**" << endl;
-    for(int i=0; i<2; i++){
+    for(int i=0; i<4; i++){
         Print_Lines_One();
-        A_star(matrix, row, column, blue_block, red_block, i);
+        pdi x = A_star(matrix, row, column, blue_block, red_block, i);
+        final_report[j].push_back(x);
     }
     Print_Lines();
-
+    j++;
+    
     cout << "**(Best First Search)**" << endl;
-    for(int i=0; i<2; i++){
+    for(int i=0; i<4; i++){
         Print_Lines_One();
-        bestfs(matrix, row, column, blue_block, red_block, i);
+        pdi x = bestfs(matrix, row, column, blue_block, red_block, i);
+        final_report[j].push_back(x);
     }
     Print_Lines();
-    
+    j++;
+
     cout << "**(Hill Climbing)**" << endl;
-    for(int i=0; i<2; i++){
+    for(int i=0; i<4; i++){
         Print_Lines_One();
-        hill_climbing(matrix, row, column, blue_block, red_block, i);
+        pdi x = hill_climbing(matrix, row, column, blue_block, red_block, i);
+        final_report[j].push_back(x);
     }
     Print_Lines();
     
+    cout << endl << "**(Relatório Final)**" << endl << endl;
+
+    if(final_report_bfs.second)
+        cout << "BFS: " << final_report_bfs.first << endl;
+    else cout << "BFS: " << final_report_bfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
+
+    if(final_report_dfs.second)
+        cout << "DFS: " << final_report_dfs.first << endl;
+    else cout << "DFS: " << final_report_dfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
+
+    for(int i=0; i<3; i++){
+        string s;
+        if(i == 0) s = "A* Search";
+        else if(i == 1) s = "Best First Search";
+        else if(i == 2) s = "Hill Climbing";
+        for(int j=0; j<4; j++){
+            string p;
+            if(j == 0) p = " (Heuristica --> Distancia Manhattan): ";
+            else if (j == 1) p = " (Heuristica --> Distancia Euclidiana): ";
+            else if (j == 2) p = " (Heuristica --> Distancia de Minkowski p = 58): ";
+            else if (j == 3) p = " (Heuristica --> Distancia de Minkowski p = 103): ";
+
+            cout << s+p;
+            string e = "";
+
+            if(!final_report[i][j].second) e = "(**CAMINHO NAO ENCONTRADO**)";
+
+            cout << final_report[i][j].first << ' ' << e << endl;
+        }
+    }
+
+    cout << endl;
+
     Free_Matrix(matrix, row);
 
     return 0;
