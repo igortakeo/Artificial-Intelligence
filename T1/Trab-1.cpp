@@ -81,6 +81,8 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
 
         pii block = q.front();
 
+        last = block;
+
         if(block == red_block) break;
 
         q.pop();
@@ -112,8 +114,9 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
         path[n] = block;
         vis[n] = true;
 
-        last = n;
     }
+
+    cout << last.first << ' ' << last.second << endl;
 
     end = clock();
 
@@ -125,11 +128,12 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
     vector<pii>SetPoints;
     SetPoints.push_back(pred);
     
-    if(matrix_answer[pred.first][pred.second] != '$')
+    if(matrix_answer[pred.first][pred.second] != '$' and matrix_answer[pred.first][pred.second] != '#')
          matrix_answer[pred.first][pred.second] = 'C';
    
     while(true){
         pred = path[pred];
+        if(pred == make_pair(0,0)) break;
         SetPoints.push_back(pred);    
         if(pred == blue_block) break;
         matrix_answer[pred.first][pred.second] = 'C';
@@ -147,7 +151,7 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
         cout << "Heuristica --> Distancia Manhattan" << endl << endl;
     else if(h == 1)
         cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
-    cout << "Caminho encontrado:" << endl;
+    cout << "Caminho percorrido:" << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
         cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
@@ -188,10 +192,12 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, i
 
     vis[blue_block] = true;
     pq.push({-matrix_dist[blue_block.first][blue_block.second], blue_block});
+    pii last;
 
     while(!pq.empty()){
 
         pii block = pq.top().second;
+        last = block;
 
         if(block == red_block) break;
 
@@ -217,12 +223,16 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, i
 
     Copy_Matrix(matrix_answer, matrix, row, column);
 
-    pii pred = red_block;
+    pii pred = last;
     vector<pii>SetPoints;
     SetPoints.push_back(pred);
     
+    if(matrix_answer[pred.first][pred.second] != '$' and matrix_answer[pred.first][pred.second] != '#')
+         matrix_answer[pred.first][pred.second] = 'C';
+
     while(true){
         pred = path[pred];
+        if(pred == make_pair(0,0)) break;
         SetPoints.push_back(pred);    
         if(pred == blue_block) break;
         matrix_answer[pred.first][pred.second] = 'C';
@@ -231,14 +241,15 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, i
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
     
-    cout << endl;
+    if(last != red_block) 
+        cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
 
     int cnt = 0;
     if(h == 0) 
         cout << "Heuristica --> Distancia Manhattan" << endl << endl;
     else if(h == 1)
         cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
-    cout << "Caminho encontrado:" << endl;
+    cout << "Caminho percorrido:" << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
         cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
@@ -277,6 +288,7 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, i
     map<pii, pii>path;
     map<pii, bool>vis;
     priority_queue<pair<pdi, pii>>pq;
+    pii last;
 
     vis[blue_block] = true;
     pq.push({{-matrix_dist[blue_block.first][blue_block.second],0}, blue_block});
@@ -286,6 +298,7 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, i
         pii block = pq.top().second;
         int depth = pq.top().first.second;
 
+        last = block;
         if(block == red_block) break;
 
         pq.pop();
@@ -310,26 +323,34 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, i
 
     Copy_Matrix(matrix_answer, matrix, row, column);
 
-    pii pred = red_block;
+    pii pred = last;
     vector<pii>SetPoints;
     SetPoints.push_back(pred);
-    
+            
+    if(matrix_answer[pred.first][pred.second] != '$' and matrix_answer[pred.first][pred.second] != '#')
+         matrix_answer[pred.first][pred.second] = 'C';
+
     while(true){
         pred = path[pred];
+        if(pred == make_pair(0,0)) break;
         SetPoints.push_back(pred);    
         if(pred == blue_block) break;
         matrix_answer[pred.first][pred.second] = 'C';
     }   
+
     reverse(SetPoints.begin(), SetPoints.end());
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
+
+    if(last != red_block) 
+        cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
 
     int cnt = 0;
     if(h == 0) 
         cout << "Heuristica --> Distancia Manhattan" << endl << endl;
     else if(h == 1)
         cout << "Heuristica --> Distancia Euclidiana" << endl << endl;
-    cout << "Caminho encontrado: " << endl;
+    cout << "Caminho percorrido: " << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
         cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
@@ -400,9 +421,11 @@ void dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
 
     double time = double(end - start) / double(CLOCKS_PER_SEC);
     int cnt = 0;
-    cout << endl;
+    if(final_path.size() == 0) 
+        cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
+
     cout << "** Depth-First Search **" << endl << endl;
-    cout << "Caminho encontrado:" << endl;
+    cout << "Caminho percorrido:" << endl;
     for(auto a : final_path){
         if(cnt%4 == 0) cout << endl;
         cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
@@ -434,12 +457,13 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
 
     queue<pii>q;
     q.push(blue_block);
+    pii last;
     vis[blue_block] = true;
 
     while(!q.empty()){
 
         pii block = q.front();
-
+        last = block;
         if(block == red_block) break;
 
         q.pop();
@@ -465,12 +489,16 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
 
     Copy_Matrix(matrix_answer, matrix, row, column);
 
-    pii pred = red_block;
+    pii pred = last;
     vector<pii>SetPoints;
-    SetPoints.push_back(pred);
-    
+    SetPoints.push_back(pred);    
+        
+    if(matrix_answer[pred.first][pred.second] != '$' and matrix_answer[pred.first][pred.second] != '#')
+         matrix_answer[pred.first][pred.second] = 'C';
+
     while(true){
         pred = path[pred];
+        if(pred == make_pair(0,0)) break;
         SetPoints.push_back(pred);    
         if(pred == blue_block) break;
         matrix_answer[pred.first][pred.second] = 'C';
@@ -480,11 +508,13 @@ void bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     double time = double(end - start) / double(CLOCKS_PER_SEC);
     
     Print_Lines();
-    cout << endl;
+    
+    if(last != red_block) 
+        cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
 
     int cnt = 0;
     cout << "** Breadth-First Search **" << endl << endl;
-    cout << "Caminho encontrado:" << endl;
+    cout << "Caminho percorrido:" << endl;
     for(auto a : SetPoints){
         if(cnt%4 == 0) cout << endl;
         cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
