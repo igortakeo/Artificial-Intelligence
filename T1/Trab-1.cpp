@@ -5,7 +5,7 @@ using namespace std;
 
 //Declaracoes das funcoes que serao usadas no codigo
 
-double **Euclidian_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
+double **Euclidean_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
 double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
 void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
 void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
@@ -26,7 +26,7 @@ void Print_Lines();
 vector<pii>mov {{0,-1}, {-1,0}, {0,1}, {1,0}};
 
 
-double **Euclidian_Distance(char **matrix, int row, int column, pii blue_block, pii red_block){
+double **Euclidean_Distance(char **matrix, int row, int column, pii blue_block, pii red_block){
     
     double **matrix_dist = (double**) malloc((row+1) * sizeof(double*));
 
@@ -67,7 +67,7 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
 
     double **matrix_dist;
     if(h == 0) matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
-    else if(h == 1) matrix_dist = Euclidian_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 1) matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -115,8 +115,6 @@ void hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_b
         vis[n] = true;
 
     }
-
-    cout << last.first << ' ' << last.second << endl;
 
     end = clock();
 
@@ -184,7 +182,7 @@ void bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, i
 
     double **matrix_dist;
     if(h == 0) matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
-    else if(h == 1) matrix_dist = Euclidian_Distance(matrix, row, column, blue_block, red_block);
+    else if(h == 1) matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -283,7 +281,7 @@ void A_star(char **matrix, int row, int column, pii blue_block, pii red_block, i
     if(h == 0) 
         matrix_dist = Manhattan_Distance(matrix, row, column, blue_block, red_block);
     else if(h == 1)
-        matrix_dist = Euclidian_Distance(matrix, row, column, blue_block, red_block);
+        matrix_dist = Euclidean_Distance(matrix, row, column, blue_block, red_block);
 
     map<pii, pii>path;
     map<pii, bool>vis;
