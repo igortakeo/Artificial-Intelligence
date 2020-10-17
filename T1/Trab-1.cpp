@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 #define pii pair<int, int>
 #define pdi pair<double, int>
-#define fastcin  ios_base::sync_with_stdio(false); cin.tie(NULL);
 using namespace std;
 
 //Declaracoes das funcoes que serao usadas no codigo
@@ -116,19 +115,6 @@ pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_bl
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 4); 
     else if(h == 4)
         matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
-
-    /*
-    cout << setprecision(3);
-    if(h == 0 or h == 1){
-    for(int i=1; i<=row; i++){
-        for(int j=1; j<=column; j++){
-                cout << matrix_dist[i][j] << ' ';
-            }
-            cout << endl;
-        }
-    }
-    cout << endl;
-    */
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -766,7 +752,7 @@ void Print_Lines(){
 }
 
 int main(){
-    fastcin
+
     cout << fixed << setprecision(6);
 
     int row, column;
@@ -793,7 +779,7 @@ int main(){
     pdi final_report_bfs = bfs(matrix, row, column, blue_block, red_block);
     
     pdi final_report_dfs = dfs(matrix, row, column, blue_block, red_block);
-
+    
     cout <<"**(A* Search)**" << endl;
     for(int i=0; i<5; i++){
         Print_Lines_One();
@@ -851,7 +837,7 @@ int main(){
             cout << final_report[i][j].first << ' ' << e << endl;
         }
     }
-
+    
     cout << endl;
     
     Free_Matrix(matrix, row);
