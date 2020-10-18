@@ -5,7 +5,7 @@ using namespace std;
 
 //Declaracoes das funcoes que serao usadas no codigo
 
-double **Manhattan_Plus_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block);
+double **Average_Manhattan_And_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block);
 double **Minkowski_Distance(char **matrix, int row, int column, pii blue_block, pii red_block, int p);
 double **Euclidean_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
 double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, pii red_block);
@@ -27,7 +27,7 @@ void Print_Lines();
 
 vector<pii>mov {{1,0}, {0,1},{0,-1}, {-1,0}, {0,1}};
 
-double **Manhattan_Plus_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block){
+double **Average_Manhattan_And_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block){
 
     double **matrix_dist = (double**) malloc((row+1) * sizeof(double*));
 
@@ -115,7 +115,7 @@ pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_bl
     else if(h == 3)
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 4); 
     else if(h == 4)
-        matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
+        matrix_dist = Average_Manhattan_And_Euclidean(matrix, row, column, blue_block, red_block);
 
     map<pii, pii>path;
     map<pii, bool>vis;
@@ -254,7 +254,7 @@ pdi bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, in
     else if(h == 3)
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 4); 
     else if(h == 4)
-        matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
+        matrix_dist = Average_Manhattan_And_Euclidean(matrix, row, column, blue_block, red_block);
 
 
     map<pii, pii>path;
@@ -376,18 +376,8 @@ pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, in
     else if(h == 3)
         matrix_dist = Minkowski_Distance(matrix, row, column, blue_block, red_block, 4); 
     else if(h == 4)
-        matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
+        matrix_dist = Average_Manhattan_And_Euclidean(matrix, row, column, blue_block, red_block);
 
-    /*
-    cout << h << endl << endl;
-
-    for(int i=1; i<=row; i++){
-        for(int j=1; j<=column; j++){
-            cout << matrix_dist[i][j] << ' ';   
-        }
-        cout << endl;
-    }
-    */
     map<pii, pii>path;
     map<pii, bool>vis;
     priority_queue<pair<pdi, pii>>pq;
