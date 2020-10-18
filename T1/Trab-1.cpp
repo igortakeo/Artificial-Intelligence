@@ -25,7 +25,7 @@ void Print_Matrix(char **matrix, int row, int column);
 void Print_Lines_One();
 void Print_Lines();
 
-vector<pii>mov {{0,-1}, {-1,0}, {0,1}, {1,0}};
+vector<pii>mov {{1,0}, {0,1},{0,-1}, {-1,0}, {0,1}};
 
 double **Manhattan_Plus_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block){
 
@@ -39,6 +39,7 @@ double **Manhattan_Plus_Euclidean(char **matrix, int row, int column, pii blue_b
        for(int j=1; j<=column; j++){
             matrix_dist[i][j] = abs(red_block.first-i) + abs(red_block.second-j);
             matrix_dist[i][j] += sqrt((double)(red_block.first-i)*(double)(red_block.first-i)+(double)(red_block.second-j)*(double)(red_block.second-j));
+            matrix_dist[i][j] /= 2;
         }
     }
     return matrix_dist;
@@ -205,7 +206,7 @@ pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_bl
     else if(h == 3)
         cout << "Heuristica --> Distancia Minkowski com p = 4" << endl;
     else if(h == 4)
-        cout << "Heuristica --> Distancia Manhattan mais Euclidiana" << endl;
+        cout << "Media entre a distancia Manhattan e a Euclidiana" << endl;
     
     
     cout << "Caminho percorrido:" << endl;
@@ -328,7 +329,7 @@ pdi bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, in
     else if(h == 3)
         cout << "Heuristica --> Distancia Minkowski com p = 4" << endl;
     else if(h == 4)
-        cout << "Heuristica --> Distancia Manhattan mais Euclidiana" << endl;
+        cout << "Media entre a distancia Manhattan e a Euclidiana" << endl;
     
     
     cout << "Caminho percorrido:" << endl;
@@ -377,6 +378,16 @@ pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, in
     else if(h == 4)
         matrix_dist = Manhattan_Plus_Euclidean(matrix, row, column, blue_block, red_block);
 
+    /*
+    cout << h << endl << endl;
+
+    for(int i=1; i<=row; i++){
+        for(int j=1; j<=column; j++){
+            cout << matrix_dist[i][j] << ' ';   
+        }
+        cout << endl;
+    }
+    */
     map<pii, pii>path;
     map<pii, bool>vis;
     priority_queue<pair<pdi, pii>>pq;
@@ -451,7 +462,7 @@ pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, in
     else if(h == 3)
         cout << "Heuristica --> Distancia Minkowski com p = 4" << endl;
     else if(h == 4)
-        cout << "Heuristica --> Distancia Manhattan mais Euclidiana" << endl;
+        cout << "Media entre a distancia Manhattan e a Euclidiana" << endl;
     
     cout << "Caminho percorrido: " << endl;
     for(auto a : SetPoints){
@@ -580,6 +591,7 @@ pdi bfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     while(!q.empty()){
 
         pii block = q.front();
+
         last = block;
         if(block == red_block) break;
 
@@ -812,10 +824,11 @@ int main(){
         cout << "BFS: " << final_report_bfs.first << endl;
     else cout << "BFS: " << final_report_bfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
 
+    
     if(final_report_dfs.second)
         cout << "DFS: " << final_report_dfs.first << endl;
     else cout << "DFS: " << final_report_dfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
-
+    
     for(int i=0; i<3; i++){
         string s;
         if(i == 0) s = "A* Search";
@@ -827,7 +840,7 @@ int main(){
             else if (j == 1) p = " (Heuristica --> Distancia Euclidiana): ";
             else if (j == 2) p = " (Heuristica --> Distancia de Minkowski p = 3): ";
             else if (j == 3) p = " (Heuristica --> Distancia de Minkowski p = 4): ";
-            else if (j == 4) p = " (Heuristica --> Distancia Manhattan mais Euclidiana): ";
+            else if (j == 4) p = " (Heuristica --> Media entre a distancia Manhattan e a Euclidiana): ";
 
             cout << s+p;
             string e = "";
