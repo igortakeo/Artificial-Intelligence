@@ -32,7 +32,7 @@ void Print_Matrix(char **matrix, int row, int column);
 void Print_Lines_One();
 void Print_Lines();
 
-vector<pii>mov {{1,0}, {0,1},{0,-1}, {-1,0}, {0,1}};
+vector<pii>mov {{0,-1}, {-1,0}, {0,1}, {1,0}};
 
 double **Average_Manhattan_And_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block){
 
@@ -836,12 +836,16 @@ int main(){
     
     cout << endl << "**(Relatório Final)**" << endl << endl;
 
-    if(final_report_bfs.second)
-        cout << "BFS: " << final_report_bfs.first << endl;
+    if(final_report_bfs.second){
+        cout << "BFS: ";
+        cout << final_report_bfs.first << endl;
+    }
     else cout << "BFS: " << final_report_bfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
 
-    if(final_report_dfs.second)
-        cout << "DFS: " << final_report_dfs.first << endl;
+    if(final_report_dfs.second){
+        cout << "DFS: ";
+        cout  << final_report_dfs.first << endl;
+    }
     else cout << "DFS: " << final_report_dfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
     
     for(int i=0; i<3; i++){
