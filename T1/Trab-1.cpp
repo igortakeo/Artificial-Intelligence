@@ -3,6 +3,14 @@
 #define pdi pair<double, int>
 using namespace std;
 
+/**
+ *  -----------------Alunos---------------------
+ *  Igor Takeo Ambo de Melo #10830054
+ *  Guilherme Targon Marques Barcellos #10724181
+ *  Mateus Ferreira Gomes #10734773
+ *   
+ **/
+
 //Declaracoes das funcoes que serao usadas no codigo
 
 double **Average_Manhattan_And_Euclidean(char **matrix, int row, int column, pii blue_block, pii red_block);
@@ -12,7 +20,6 @@ double **Manhattan_Distance(char **matrix, int row, int column, pii blue_block, 
 pdi hill_climbing(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
 pdi bestfs(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
 pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, int h);
-void solve_dfs(char **matrix, int row, int column, pii block, pii red_block, vector<pii>&path, map<pii, bool>&vis, vector<pii>&final_path);
 pdi dfs(char **matrix, int row, int column, pii blue_block, pii red_block);
 pdi bfs(char **matrix, int row, int column, pii blue_block, pii red_block);
 void Copy_Matrix(char **a, char **b, int row, int column);
@@ -421,7 +428,7 @@ pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, in
     SetPoints.push_back(pred);
             
     if(matrix_answer[pred.first][pred.second] != '$' and matrix_answer[pred.first][pred.second] != '#')
-         matrix_answer[pred.first][pred.second] = 'C';
+        matrix_answer[pred.first][pred.second] = 'C';
 
     while(true){
         pred = path[pred];
@@ -480,72 +487,91 @@ pdi A_star(char **matrix, int row, int column, pii blue_block, pii red_block, in
     return report;
 }
 
-
-void solve_dfs(char **matrix, int row, int column, pii block, pii red_block, vector<pii>&path, map<pii, bool>&vis, vector<pii>&final_path){
-    vis[block] = true;
-    path.push_back(block);
-    if(block == red_block){
-        final_path = path;
-        return;
-    }
-
-    for(auto a : mov){
-        pii next = make_pair(block.first+a.first, block.second+a.second);
-        if(next.first == 0 or next.second == 0 or next.first == row+1 or next.second == column+1){ 
-            continue;
-        }
-        if((matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$') and !vis[next]){      
-            solve_dfs(matrix, row, column, next, red_block, path, vis, final_path);
-            path.pop_back();
-        }
-
-    }
-}
-
 pdi dfs(char **matrix, int row, int column, pii blue_block, pii red_block){
     
     pdi report;
     report.second = 1;
     
-    vector<pii>path, final_path;
+    vector<pii>p, final_path;
     map<pii, bool>vis;
+
+    map<pii, pii>path;
 
     clock_t start, end;
 
     start = clock();
     
-    solve_dfs(matrix, row, column, blue_block, red_block, path, vis, final_path);   
-    
+    vis.clear();
+
+    stack<pii>st;
+    pii last;
+    st.push(blue_block);
+
+    while(!st.empty()){
+
+        pii block = st.top();
+        st.pop();
+        
+        last = block;
+        if(block == red_block) break;
+
+        if(!vis[block]){
+            vis[block] = true; 
+        }
+
+        for(auto a : mov){
+            pii next = make_pair(block.first+a.first, block.second+a.second);
+            if(next.first == 0 or next.second == 0 or next.first == row+1 or next.second == column+1){ 
+                continue;
+            }
+            if((matrix[next.first][next.second] == '*' or matrix[next.first][next.second] == '$') and !vis[next]){      
+                st.push(next);
+                path[next] = block;
+            }
+        }
+    }
+
     end = clock();
 
     char **matrix_answer = Alloc_Matrix(row, column);
-
     Copy_Matrix(matrix_answer, matrix, row, column);
 
+    pii pred = red_block;
+    vector<pii>SetPoints;
+    SetPoints.push_back(pred);
+    
+    if(matrix_answer[pred.first][pred.second] != '$' and matrix_answer[pred.first][pred.second] != '#')
+        matrix_answer[pred.first][pred.second] = 'C';
+    
+    while(true){
+        pred = path[pred];
+        if(pred == make_pair(0,0)) break;
+        SetPoints.push_back(pred);    
+        if(pred == blue_block) break;
+        matrix_answer[pred.first][pred.second] = 'C';
+    }   
 
-    for(auto a : final_path){
-        if(a == blue_block or a == red_block) continue;
-        matrix_answer[a.first][a.second] = 'C';
-    }
+    reverse(SetPoints.begin(), SetPoints.end());
 
-    double time = double(end - start) / double(CLOCKS_PER_SEC);
-    int cnt = 0;
-
-    if(final_path.size() == 0) {
+    if(last != red_block) {
         cout << endl <<  "**CAMINHO NAO ENCONTRADO**" << endl << endl;
         report.second = 0;
     }
 
-    report.first = time;
-
+    int c = 0;
     cout << "** Depth-First Search **" << endl << endl;
     cout << "Caminho percorrido:" << endl;
-    for(auto a : final_path){
-        if(cnt%4 == 0) cout << endl;
-        cout << "[" << cnt+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
-        cnt++;
+    for(auto a : SetPoints){
+        if(c%4 == 0) cout << endl;
+        cout << "[" << c+1 << "]" << "-->" << "(" << a.first << "," << a.second << ")" << "  ";
+        c++;
     }
     cout << endl << endl;
+
+    double time = double(end - start) / double(CLOCKS_PER_SEC);
+    int cnt = 0;
+
+    report.first = time;
 
     cout << "Representacao no tabuleiro:" << endl << endl; 
 
@@ -814,7 +840,6 @@ int main(){
         cout << "BFS: " << final_report_bfs.first << endl;
     else cout << "BFS: " << final_report_bfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
 
-    
     if(final_report_dfs.second)
         cout << "DFS: " << final_report_dfs.first << endl;
     else cout << "DFS: " << final_report_dfs.first << ' ' << "(**CAMINHO NAO ENCONTRADO**)" << endl;
@@ -844,6 +869,6 @@ int main(){
     cout << endl;
     
     Free_Matrix(matrix, row);
-
+    
     return 0;
 }
